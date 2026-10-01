@@ -1,0 +1,39 @@
+scope: postgres-ha
+name: postgres-replica
+
+restapi:
+  listen: 0.0.0.0:8008
+  connect_address: postgres-replica:8008
+
+etcd3:
+  hosts: etcd:2379
+
+bootstrap:
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+
+    postgresql:
+      use_pg_rewind: true
+      use_slots: true
+
+postgresql:
+  listen: 0.0.0.0:5432
+  connect_address: postgres-replica:5432
+
+  data_dir: /var/lib/postgresql/data
+
+  authentication:
+    superuser:
+      username: postgres
+      password: postgres
+
+    replication:
+      username: replicator
+      password: replica_password
+
+  parameters:
+    wal_level: replica
+    max_wal_senders: 10
+    max_replication_slots: 10
